@@ -1,0 +1,34 @@
+name: artifact test
+
+on: [workflow_dispatch]
+
+permissions:
+  contents: write
+
+jobs:
+  build_and_test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up Python 3.9
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.9"
+          cache: 'pip' # caching pip dependencies
+
+      - name: Install dependencies
+        run: |
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+
+      - name: Run test.py
+        run: |
+          python test.py
+        
+      - name: Archive production artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: uploaded-json
+          path: |
+            jsons
