@@ -1,0 +1,44 @@
+name: Update Files
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  update-files:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v2
+
+      - name: Download index.html
+        run: |
+          curl -sSL -o index.html https://raw.githubusercontent.com/brianjenkins94/private-repo-file-explorer/main/index.html
+          # Check if index.html exists
+          if [ -f "index.html" ]; then
+            echo "index.html downloaded successfully."
+          else
+            echo "Failed to download index.html."
+            exit 1
+          fi
+
+      - name: Generate tree.txt
+        run: |
+          find . -type f -not -path "*/.*" -not -path "*/node_modules/**" > tree.txt
+          # Check if tree.txt exists
+          if [ -f "tree.txt" ]; then
+            echo "tree.txt generated successfully."
+          else
+            echo "Failed to generate tree.txt."
+            exit 1
+          fi
+
+      - name: Commit and Push Changes
+        run: |
+          git config --local user.email "actions@github.com"
+          git config --local user.name "GitHub Actions"
+          git add index.html tree.txt
+          git diff --quiet || git commit -m "Update files [skip ci]"
+          git push
